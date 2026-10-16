@@ -567,14 +567,13 @@
     <button type="button" class="premium-nav-link active" data-nav-action="home">⌂ <span>Home</span></button>
     <button type="button" class="premium-nav-link" data-nav-action="subjects">▦ <span>Subjects</span></button>
     <button type="button" class="premium-nav-link" data-nav-action="find">⌕ <span>Find My Work</span></button>
-    <div class="premium-nav-dropdown">
+    <div class="premium-nav-dropdown" id="admin-nav-dropdown" style="display:none;">
       <button type="button" class="premium-nav-link premium-dropdown-trigger" aria-expanded="false">⚙ <span>Administration</span> <small>▾</small></button>
       <div class="premium-dropdown-panel">
         <div class="premium-dropdown-heading">SCHOOL MANAGEMENT</div>
         <button type="button" data-existing-action="manage-roster-btn">♙ <span>Manage students</span></button>
         <button type="button" data-existing-action="subject-status-btn">✓ <span>Mark subjects complete</span></button>
         <button type="button" data-existing-action="activity-log-btn">◷ <span>Activity log</span></button>
-        <button type="button" data-existing-action="admin-toggle-btn">♙ <span>Admin sign in</span></button>
       </div>
     </div>
   </div>
@@ -980,12 +979,14 @@ function showSubjectView(){
 
 function renderAdminBox(){
   const statusEl = document.getElementById('admin-status');
-  const btn = document.getElementById('admin-toggle-btn');
+  const btn = document.querySelector('#admin-box #admin-toggle-btn');
+  const adminNav = document.getElementById('admin-nav-dropdown');
   const rosterBtn = document.getElementById('manage-roster-btn');
   const mediaBtn = document.getElementById('media-library-btn');
   const statusBtn = document.getElementById('subject-status-btn');
   const activityBtn = document.getElementById('activity-log-btn');
   if(isAdmin()){
+    if(adminNav){ adminNav.style.display = 'block'; adminNav.setAttribute('aria-hidden', 'false'); }
     statusEl.innerHTML = `Signed in as <b>${escapeHtml(sessionStorage.getItem('adminUser') || 'admin')}</b>. You can edit and delete entries.`;
     btn.textContent = 'Sign out';
     rosterBtn.style.display = 'block';
@@ -993,6 +994,13 @@ function renderAdminBox(){
     statusBtn.style.display = 'block';
     activityBtn.style.display = 'block';
   }else{
+    if(adminNav){
+      adminNav.style.display = 'none';
+      adminNav.setAttribute('aria-hidden', 'true');
+      const trigger = adminNav.querySelector('.premium-dropdown-trigger');
+      if(trigger) trigger.setAttribute('aria-expanded', 'false');
+      adminNav.classList.remove('open');
+    }
     statusEl.textContent = 'Viewing as guest — anyone can upload projects.';
     btn.textContent = 'Admin sign in';
     rosterBtn.style.display = 'none';
@@ -2681,7 +2689,7 @@ document.getElementById('upload-form').addEventListener('submit', async (e)=>{
 
 /* ---------------- Admin login modal ---------------- */
 
-document.getElementById('admin-toggle-btn').onclick = ()=>{
+document.querySelector('#admin-box #admin-toggle-btn').onclick = ()=>{
   if(isAdmin()){
     sessionStorage.removeItem('adminToken');
     sessionStorage.removeItem('adminUser');
